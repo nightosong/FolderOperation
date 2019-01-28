@@ -1,24 +1,34 @@
 import os
 import threading, multiprocessing
 
+
 def file_capacity(file_path):
+    """
+    计算文件大小
+    """
     s = os.path.getsize(file_path)
     return s
+
 
 def file_read():
     test_path = './char_datasets/0409/0023.png'
     file_cap = file_capacity(test_path)
     print(type(file_cap), file_cap)
 
+    
 def remove_files(file_root, file_list):
+    """
+    根据指定大小移除文件
+    """
     for f in file_list:
         s = os.path.join(file_root, f)
         files = os.listdir(s)
         for x in files:
             sx = os.path.join(s, x)
-            if fileCapacity(sx) <= 148:
+            if file_capacity(sx) <= 148:
                 os.remove(sx)
 
+                
 if __name__ == '__main__':
     files = os.listdir('./char_datasets')
     l = len(files)
