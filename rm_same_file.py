@@ -6,6 +6,9 @@ from tqdm import tqdm
 
 
 class DiskWalk(object):
+    """
+    获取路径下的所有文件
+    """
     def __init__(self, path):
         self.path = path
     
@@ -20,6 +23,9 @@ class DiskWalk(object):
 
 
 def create_checksum(path):
+    """
+    计算文件的MD5值
+    """
     fp = open(path, 'rb')
     checksum = hashlib.md5()
     while True:
@@ -32,6 +38,10 @@ def create_checksum(path):
 
 
 def find_dupes(path):
+    """
+    创建重复文件的字典
+    注： key=重复文件名, value=已有文件名
+    """
     record = {}
     dup = {}
     d = DiskWalk(path)
@@ -46,6 +56,9 @@ def find_dupes(path):
 
 
 def deal(record, rt, folders):
+    """
+    移除重复文件
+    """
     for folder in folders:
         rtf = os.path.join(rt, folder)
         files = os.listdir(rtf)
