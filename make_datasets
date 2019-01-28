@@ -1,0 +1,62 @@
+import numpy as np
+import os, random
+import cv2
+import glob
+import threading, multiprocessing
+from PIL import Image, ImageDraw, ImageFont
+
+image_size = 128
+char_used_path = './chars.txt'
+datasets_dir = './char_datasets'
+
+
+def load_font(file, font_size=128):
+    return ImageFont.truetype(open(file, 'rb'), size=font_size, encoding='utf-8')
+
+
+def plot_char(canvas_size, offset, char, font):
+    img = Image.new('L', (canvas_size, canvas_size), (255))
+    draw = ImageDraw.Draw(img)
+    draw.text((offset, offset), char, (0), font=font)
+    return np.array(img)
+
+
+def load_chars(chars_path):
+    with open(chars_path, encoding='utf-8') as file:
+        chars = file.read().strip()
+        return list(chars)
+
+
+def deal(files, start_index, chars):
+    for i, file in enumerate(files):
+        try:
+            font = load_font(file, 100)
+            images = [plot_char(128, 5, char, font) for char in chars]
+            for j, img in enumerate(images):
+                save_dir = datasets_dir + '/%04d/%04d.png' % (j, i + start_index)
+                cv2.imwrite(save_dir, img)
+        except Exception:
+            print('font load failed:', file)
+            continue
+
+
+if __name__ == '__main__':
+    if not os.path.exists(datasets_dir):
+        os.mkdir(datasets_dir)
+    normal_fonts = './fonts/normal_fonts'
+    
+    chars_patch = load_chars(char_used_path)
+    chars_len = len(chars_patch)
+    files = sorted(glob.glob(os.path.join(normal_fonts, '*.ttf')))
+    files = [file.strip() for file in files]
+    for i in range(chars_len):
+        os.mkdir(datasets_dir + '/%04d' % i)
+    for th in range(16):
+        end_f = (th + 1) * 175
+        if end_f > len(files):
+            end_f = len(files)
+        file_used = files[th * 175 : end_f]
+        t = threading.Thread(target=deal, 
+                             args=(file_used, th * 175, chars_patch))
+        t.start()
+
